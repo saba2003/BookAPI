@@ -16,9 +16,3 @@ This is a simple **Book Management API** built using **ASP.NET Core**, **Entity 
 - **Swagger (Swashbuckle)**
 - **Dependency Injection**
 - **RESTful API Architecture**
-
-## ⚙️ Setup & Installation
-1. **Clone the repository**:
-   ```sh
-   git clone https://github.com/yourusername/book-api.git
-   cd book-api
