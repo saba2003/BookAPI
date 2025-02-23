@@ -1,0 +1,42 @@
+﻿# Build output
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.vs
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# NuGet packages
+packages/
+*.nupkg
+.project.assets.json
+project.lock.json
+
+# Environment files
+.env
+secrets.json
+
+# Entity Framework migrations
+Migrations/
+
+# ASP.NET temporary files
+wwwroot/
+node_modules/
+
+# Swagger generated files
+swagger/
+
+# Publish output
+publish/
+
+# Database
+*.mdf
+*.ldb
+*.sqlite

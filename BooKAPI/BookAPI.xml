@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BookAPI</name>
+    </assembly>
+    <members>
+        <member name="M:BookAPI.Controllers.BooksController.Index(System.Int32,System.Int32)">
+            <summary>
+            Retrieves a paginated list of books, sorted by popularity.
+            </summary>
+            <param name="page">Page number (default: 1)</param>
+            <param name="pageSize">Number of books per page (default: 10)</param>
+            <returns>Paginated book list</returns>
+        </member>
+        <member name="M:BookAPI.Controllers.BooksController.GetBook(System.Int32)">
+            <summary>
+            Retrieves details of a specific book by ID.
+            </summary>
+            <param name="id">The ID of the book</param>
+            <returns>Book details</returns>
+        </member>
+        <member name="M:BookAPI.Controllers.BooksController.AddBook(BookAPI.Models.Book)">
+            <summary>
+            Adds a new book to the database.
+            </summary>
+            <param name="book">Book object to add</param>
+            <returns>The created book</returns>
+        </member>
+        <member name="M:BookAPI.Controllers.BooksController.AddBooks(System.Collections.Generic.List{BookAPI.Models.Book})">
+            <summary>
+            bulk Adds new books to the database.
+            </summary>
+            <param name="books">Book objects to add</param>
+            <returns>created books</returns>
+        </member>
+        <member name="M:BookAPI.Controllers.BooksController.UpdateBook(System.Int32,BookAPI.Models.Book)">
+            <summary>
+            Updates an existing book.
+            </summary>
+            <param name="id">ID of the book to update</param>
+            <param name="updatedBook">Updated book object</param>
+            <returns>Updated book</returns>
+        </member>
+        <member name="M:BookAPI.Controllers.BooksController.SoftDeleteBook(System.Int32)">
+            <summary>
+            Soft deletes a book by ID.
+            </summary>
+            <param name="id">ID of the book to soft delete</param>
+            <returns>Status message</returns>
+        </member>
+        <member name="M:BookAPI.Controllers.BooksController.SoftDeleteBooks(System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Bulk deletes books based on their IDs.
+            </summary>
+            <param name="bookIds">List of book IDs to delete</param>
+            <returns>Status message</returns>
+        </member>
+        <member name="T:BookAPI.Migrations.Init">
+            <inheritdoc />
+        </member>
+        <member name="M:BookAPI.Migrations.Init.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookAPI.Migrations.Init.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookAPI.Migrations.Init.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:BookAPI.Migrations.addedisDisabledforsoftdeleting">
+            <inheritdoc />
+        </member>
+        <member name="M:BookAPI.Migrations.addedisDisabledforsoftdeleting.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookAPI.Migrations.addedisDisabledforsoftdeleting.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookAPI.Migrations.addedisDisabledforsoftdeleting.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>
