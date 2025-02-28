@@ -1,5 +1,8 @@
 ﻿using BookAPI.Data;
+using BookAPI.DTOs;
 using BookAPI.Models;
+using BookAPI.Repositories;
+using BookAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +12,11 @@ namespace BookAPI.Controllers
     [ApiController]
     public class BooksController : Controller
     {
-        private readonly BookAPIContext _context;
-        public BooksController(BookAPIContext context)
+        private readonly BookService _bookService;
+
+        public BooksController(BookService bookService)
         {
-            _context = context;
+            _bookService = bookService;
         }
 
         /// <summary>
@@ -22,43 +26,13 @@ namespace BookAPI.Controllers
         /// <param name="pageSize">Number of books per page (default: 10)</param>
         /// <returns>Paginated book list</returns>
         [HttpGet]
-        public async Task<IActionResult> Index([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
         {
             if (page < 1 || pageSize < 1)
-            {
                 return BadRequest(new { message = "Page and pageSize must be greater than zero." });
-            }
 
-            var currentYear = DateTime.Now.Year;
-
-            var booksQuery = await _context.Books
-                .Where(b => !b.IsDeleted)
-                .ToListAsync();
-
-            var books = booksQuery
-                .Select(b => new
-                {
-                    b.Title,
-                    PopularityScore = (b.Views * 0.5) + ((currentYear - b.PublicationYear) * 2)
-                })
-                .OrderByDescending(b => b.PopularityScore)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(b => new { b.Title })
-                .ToList();
-
-            var totalBooks = booksQuery.Count;
-
-            var response = new
-            {
-                TotalBooks = totalBooks,
-                TotalPages = (int)Math.Ceiling((double)totalBooks / pageSize),
-                CurrentPage = page,
-                PageSize = pageSize,
-                Books = books
-            };
-
-            return Ok(response);
+            var books = await _bookService.GetBooksByPopularity(page, pageSize);
+            return Ok(books);
         }
 
         /// <summary>
@@ -69,15 +43,12 @@ namespace BookAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBook(int id)
         {
-            var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == id && !b.IsDeleted);
+            var book = await _bookService.GetBookById(id);
 
             if (book == null)
             {
                 return NotFound(new { message = "Book not found." });
             }
-
-            book.Views++;
-            await _context.SaveChangesAsync();
 
             return Ok(book);
         }
@@ -85,67 +56,58 @@ namespace BookAPI.Controllers
         /// <summary>
         /// Adds a new book to the database.
         /// </summary>
-        /// <param name="book">Book object to add</param>
+        /// <param name="bookDto">Book object to add</param>
         /// <returns>The created book</returns>
         [HttpPost]
-        public async Task<IActionResult> AddBook([FromBody] Book book)
+        public async Task<IActionResult> AddBook([FromBody] BookDto bookDto)
         {
-            if (_context.Books.Any(b => b.Title == book.Title))
+            if (!ModelState.IsValid)
             {
-                return Conflict(new { message = "A book with the same title already exists" });
+                return BadRequest(ModelState);
             }
 
-            _context.Books.Add(book);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
+            var createdBook = await _bookService.AddBook(bookDto);
+            return CreatedAtAction(nameof(GetBook), new { id = createdBook.Id }, createdBook);
         }
 
         /// <summary>
         /// bulk Adds new books to the database.
         /// </summary>
-        /// <param name="books">Book objects to add</param>
+        /// <param name="bookDtos">Book objects to add</param>
         /// <returns>created books</returns>
         [HttpPost("bulk")]
-        public async Task<IActionResult> AddBooks([FromBody] List<Book> books)
+        public async Task<IActionResult> AddBooks([FromBody] List<BookDto> bookDtos)
         {
-            foreach (var book in books)
+            if (!ModelState.IsValid)
             {
-                if (_context.Books.Any(b => b.Title == book.Title))
-                {
-                    return Conflict(new { message = $"A book with the title '{book.Title}' already exists." });
-                }
+                return BadRequest(ModelState);
             }
 
-            _context.Books.AddRange(books);
-            await _context.SaveChangesAsync();
-
-            return Created("Books added successfully", books);
+            var createdBooks = await _bookService.AddBooks(bookDtos);
+            return Created("Books added successfully", createdBooks);
         }
 
         /// <summary>
         /// Updates an existing book.
         /// </summary>
         /// <param name="id">ID of the book to update</param>
-        /// <param name="updatedBook">Updated book object</param>
+        /// <param name="updatedBookDto">Updated book object</param>
         /// <returns>Updated book</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBook(int id, [FromBody] Book updatedBook)
+        public async Task<IActionResult> UpdateBook(int id, [FromBody] BookDto updatedBookDto)
         {
-            var book = await _context.Books.FindAsync(id);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            if (book == null)
+            var updatedBook = await _bookService.UpdateBook(id, updatedBookDto);
+            if (updatedBook == null)
             {
                 return NotFound(new { message = "Book not found." });
             }
 
-            book.Title = updatedBook.Title;
-            book.Author = updatedBook.Author;
-            book.PublicationYear = updatedBook.PublicationYear;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(book);
+            return Ok(updatedBook);
         }
 
         /// <summary>
@@ -156,15 +118,11 @@ namespace BookAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> SoftDeleteBook(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-
-            if (book == null)
+            var result = await _bookService.SoftDeleteBook(id);
+            if (!result)
             {
                 return NotFound(new { message = "Book not found." });
             }
-
-            book.IsDeleted = true;
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
@@ -177,15 +135,11 @@ namespace BookAPI.Controllers
         [HttpDelete("bulk")]
         public async Task<IActionResult> SoftDeleteBooks([FromBody] List<int> bookIds)
         {
-            var books = _context.Books.Where(b => bookIds.Contains(b.Id)).ToList();
-
-            if (books.Count == 0)
+            var result = await _bookService.SoftDeleteBooks(bookIds);
+            if (!result)
             {
                 return NotFound(new { message = "No books found for deletion." });
             }
-
-            books.ForEach(b => b.IsDeleted = true);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

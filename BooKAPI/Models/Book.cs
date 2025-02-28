@@ -1,21 +1,51 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace BookAPI.Models
 {
     public class Book
     {
         [Key]
-        public int Id { get; set; }
+        private int BookId;
 
-        public string Title { get; set; } = string.Empty;
+        private string BookTitle = string.Empty;
 
-        public string? Author { get; set; }
+        private string? BookAuthor;
 
-        public int PublicationYear { get; set; }
+        private int BookPublicationYear;
 
-        public int Views { get; set; } = 0;
+        private int BookViews = 0;
 
-        public bool IsDeleted { get; set; } = false;
+        private bool IsBookDeleted = false;
+
+        public int Id
+        {
+            get { return BookId; }
+            set { BookId = value; }
+        }
+        public string Title
+        {
+            get { return BookTitle; }
+            set { BookTitle = value; }
+        }
+        public string? Author
+        {
+            get { return BookAuthor; }
+            set { BookAuthor = value; }
+        }
+        public int PublicationYear
+        {
+            get { return BookPublicationYear; }
+            set { BookPublicationYear = value; }
+        }
+        public int Views
+        {
+            get { return BookViews; }
+            set { BookViews = value; }
+        }
+        public bool IsDeleted
+        {
+            get { return IsBookDeleted; }
+            set { IsBookDeleted = value; }
+        }
     }
 }

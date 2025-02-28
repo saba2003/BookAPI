@@ -1,4 +1,6 @@
 using BookAPI.Data;
+using BookAPI.Repositories;
+using BookAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -10,10 +12,16 @@ namespace BookAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container
-            builder.Services.AddControllers();
+            // Adding DbContext
             builder.Services.AddDbContext<BookAPIContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
+
+            // Registering repositories and services
+            builder.Services.AddScoped<IBookRepository, BookRepository>();
+            builder.Services.AddScoped<BookService>();
+
+            // Add controllers
+            builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
